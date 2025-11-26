@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
 
                   const Text(
-                    'Silakan login untuk mengelola ANTR antrian',
+                    'Silakan login untuk mengelola antrian',
                     style: TextStyle(fontSize: 14, color: Color(0xFF757575)),
                     textAlign: TextAlign.center,
                   ),
