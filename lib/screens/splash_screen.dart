@@ -17,16 +17,15 @@ class SplashScreen extends StatelessWidget {
           ),
           OnboardingPageModel(
             title: 'Ambil Nomor Antrian',
-            description:
-                'Dapatkan nomor antrian dengan mudah dan cepat tanpa harus mengantri',
-            imageUrl: 'assets/images/hospital.png',
+            description: 'Dapatkan nomor antrian dengan mudah dan cepat',
+            imageUrl: 'assets/images/Slide01.png',
             bgColor: Colors.blue.shade500,
           ),
           OnboardingPageModel(
             title: 'Pantau Antrian Real-time',
             description:
                 'Lihat posisi antrian Anda secara real-time kapan saja',
-            imageUrl: 'assets/images/queuee.png',
+            imageUrl: 'assets/images/Slide02.png',
             bgColor: Colors.blue.shade600,
           ),
         ],
@@ -100,17 +99,18 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                     final item = widget.pages[idx];
                     return Column(
                       children: [
+                        const SizedBox(height: 10),
                         Expanded(
-                          flex: 3,
+                          flex: 4,
                           child: Padding(
-                            padding: const EdgeInsets.all(32.0),
+                            padding: const EdgeInsets.all(24.0),
                             child: Center(
                               child: Container(
-                                width: 200,
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(0, 255, 255, 255),
-                                  borderRadius: BorderRadius.circular(30),
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.85,
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height * 0.5,
                                 ),
                                 child: item.imageUrl.startsWith('http')
                                     ? Image.network(
@@ -124,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                                             (context, error, stackTrace) {
                                               return Icon(
                                                 Icons.queue_play_next_rounded,
-                                                size: 100,
+                                                size: 150,
                                                 color: widget
                                                     .pages[_currentPage]
                                                     .bgColor,
@@ -138,9 +138,13 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                         Expanded(
                           flex: 1,
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 4.0,
+                                ),
                                 child: Text(
                                   item.title,
                                   textAlign: TextAlign.center,
@@ -158,7 +162,7 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24.0,
-                                  vertical: 8.0,
+                                  vertical: 0,
                                 ),
                                 child: Text(
                                   item.description,

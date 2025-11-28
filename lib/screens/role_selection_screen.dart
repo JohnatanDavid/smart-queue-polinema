@@ -68,7 +68,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     children: [
                       // User Card
                       RoleCard(
-                        imagePath: 'assets/images/receptionist.png',
+                        imagePath: 'assets/images/Logo1.png',
                         title: 'Pasien',
                         subtitle: 'Ambil nomor antrian',
                         color: Colors.white,
@@ -87,7 +87,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
                       // Admin Card
                       RoleCard(
-                        imagePath: 'assets/images/settings.png',
+                        imagePath: 'assets/images/Logo2.png',
                         title: 'Admin',
                         subtitle: 'Kelola antrian',
                         color: Colors.white,
@@ -205,7 +205,10 @@ class _RoleCardState extends State<RoleCard>
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(255, 255, 255, 255),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade300, width: 1),
+                      border: Border.all(
+                        color: const Color.fromARGB(0, 236, 5, 5),
+                        width: 1,
+                      ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
