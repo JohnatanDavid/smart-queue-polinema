@@ -30,27 +30,59 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: () => Navigator.pop(context),
+            padding: EdgeInsets.zero,
+          ),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Login Admin',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Masuk ke akun Anda',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
-                color: Colors.white.withOpacity(0.9),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: const Icon(Icons.admin_panel_settings_rounded, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Login Admin',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  'Masuk ke akun Anda',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        elevation: 0,
+        elevation: 4,
+        shadowColor: Colors.blue.withOpacity(0.5),
+        centerTitle: true,
         toolbarHeight: 70,
       ),
       body: SingleChildScrollView(
@@ -62,46 +94,44 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 40),
-                
-                // Icon
+
+                // Gambar dengan ukuran yang sudah pas
                 Container(
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
+                    color: const Color.fromARGB(0, 227, 242, 253),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.admin_panel_settings,
-                    size: 60,
-                    color: Colors.blue,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/iconlogin.png',
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit
+                          .contain, // Gunakan contain agar gambar tidak terpotong
+                    ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 const Text(
                   'Login Admin Multi-Poli',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text(
                   'Kelola 2 poli sekaligus dalam 1 dashboard',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Email Field
                 TextFormField(
                   controller: _emailController,
@@ -124,9 +154,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Password Field
                 TextFormField(
                   controller: _passwordController,
@@ -161,9 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Login Button
                 SizedBox(
                   height: 56,
@@ -194,9 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Info Card
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -232,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Debug Message
                 if (_debugMessage != null) ...[
                   const SizedBox(height: 16),
@@ -315,11 +345,11 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       debugPrint('❌ Login error: $e');
-      
+
       setState(() {
         _debugMessage = e.toString();
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
