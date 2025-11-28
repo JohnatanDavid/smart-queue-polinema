@@ -10,11 +10,7 @@ class TiketScreen extends StatelessWidget {
   final AntrianModel antrian;
   final LayananModel layanan;
 
-  const TiketScreen({
-    super.key,
-    required this.antrian,
-    required this.layanan,
-  });
+  const TiketScreen({super.key, required this.antrian, required this.layanan});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +21,9 @@ class TiketScreen extends StatelessWidget {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Keluar'),
-            content: const Text('Yakin ingin keluar? Nomor antrian Anda akan tetap aktif.'),
+            content: const Text(
+              'Yakin ingin keluar? Nomor antrian Anda akan tetap aktif.',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -70,7 +68,7 @@ class TiketScreen extends StatelessWidget {
               stream: FirebaseService.getAntrianByLayananStream(layanan.id),
               builder: (context, allAntrianSnapshot) {
                 final allAntrian = allAntrianSnapshot.data ?? [];
-                
+
                 // Hitung sisa antrian
                 final sisaAntrian = allAntrian.where((a) {
                   return a.nomorUrut < currentAntrian.nomorUrut &&
@@ -149,7 +147,7 @@ class TiketScreen extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: _getStatusColor(currentAntrian.status),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   _getStatusText(currentAntrian.status),
@@ -228,7 +226,8 @@ class TiketScreen extends StatelessWidget {
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             'Estimasi Waktu Tunggu',
@@ -239,7 +238,9 @@ class TiketScreen extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            Helpers.formatEstimasiWaktu(estimasiMenit),
+                                            Helpers.formatEstimasiWaktu(
+                                              estimasiMenit,
+                                            ),
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -260,25 +261,27 @@ class TiketScreen extends StatelessWidget {
                                 label: 'Nama Pasien',
                                 value: currentAntrian.namaPasien,
                               ),
-                              _DetailRow(
-                                label: 'Poli',
-                                value: layanan.nama,
-                              ),
+                              _DetailRow(label: 'Poli', value: layanan.nama),
                               _DetailRow(
                                 label: 'Tanggal Kunjungan',
                                 value: Helpers.formatDateForDisplay(
-                                  DateTime.fromMillisecondsSinceEpoch(currentAntrian.waktuAmbil),
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    currentAntrian.waktuAmbil,
+                                  ),
                                 ),
                               ),
                               _DetailRow(
                                 label: 'Waktu Pengambilan',
                                 value: Helpers.formatTime(
-                                  DateTime.fromMillisecondsSinceEpoch(currentAntrian.waktuAmbil),
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                    currentAntrian.waktuAmbil,
+                                  ),
                                 ),
                               ),
                               _DetailRow(
                                 label: 'Jam Operasional',
-                                value: '${layanan.jamBuka} - ${layanan.jamTutup}',
+                                value:
+                                    '${layanan.jamBuka} - ${layanan.jamTutup}',
                               ),
                             ],
                           ),
@@ -291,11 +294,14 @@ class TiketScreen extends StatelessWidget {
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton(
-                              onPressed: () => _showCancelDialog(context, currentAntrian),
+                              onPressed: () =>
+                                  _showCancelDialog(context, currentAntrian),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
                                 side: const BorderSide(color: Colors.white),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -349,7 +355,9 @@ class TiketScreen extends StatelessWidget {
   }
 
   String _getCurrentServing(List<AntrianModel> allAntrian) {
-    final serving = allAntrian.where((a) => a.status == StatusAntrian.dipanggil).toList();
+    final serving = allAntrian
+        .where((a) => a.status == StatusAntrian.dipanggil)
+        .toList();
     if (serving.isEmpty) return '-';
     return serving.first.nomorAntrian;
   }
@@ -415,10 +423,7 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           textAlign: TextAlign.center,
         ),
       ],
@@ -430,10 +435,7 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -444,10 +446,7 @@ class _DetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           Text(
             value,
