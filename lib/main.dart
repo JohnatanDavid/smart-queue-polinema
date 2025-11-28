@@ -6,7 +6,7 @@ import 'screens/admin/display_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -15,7 +15,7 @@ void main() async {
   } catch (e) {
     debugPrint('❌ Firebase initialization error: $e');
   }
-  
+
   runApp(const MyApp());
 }
 
@@ -30,14 +30,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
-        fontFamily: 'Inter',
+        fontFamily: 'Poppins',
       ),
       home: const SplashScreen(),
-      
+
       // Routes untuk akses display terpisah
       routes: {
-        '/display/poli_umum': (context) => const DisplayScreen(layananId: 'poli_umum'),
-        '/display/poli_gigi': (context) => const DisplayScreen(layananId: 'poli_gigi'),
+        '/display/poli_umum': (context) =>
+            const DisplayScreen(layananId: 'poli_umum'),
+        '/display/poli_gigi': (context) =>
+            const DisplayScreen(layananId: 'poli_gigi'),
       },
     );
   }
