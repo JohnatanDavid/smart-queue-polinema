@@ -1,19 +1,3 @@
-# smart_queue
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
 import 'package:flutter/material.dart';
 import '../../models/admin_model.dart';
 import '../../models/loket_model.dart';
@@ -39,9 +23,6 @@ class MultiPoliDashboardScreen extends StatefulWidget {
 }
 
 class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
-  // Admin bisa kelola 2 poli: Umum (loket_1) dan Gigi (loket_2)
-  final List<String> _loketIds = ['loket_1', 'loket_2'];
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +36,6 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
             icon: const Icon(Icons.tv),
             tooltip: 'Buka Display',
             onPressed: () {
-              // Buka display dalam bottom sheet untuk pilih poli
               _showDisplayOptions(context);
             },
           ),

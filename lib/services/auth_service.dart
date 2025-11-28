@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import '../models/admin_model.dart';
 
 class AuthService {
@@ -18,40 +19,69 @@ class AuthService {
     required String password,
   }) async {
     try {
-      // Login to Firebase Auth
+      debugPrint('🔐 Step 1: Starting Firebase Auth login...');
+      debugPrint('📧 Email: $email');
+      
+      // Step 1: Login to Firebase Auth
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       
       if (userCredential.user == null) {
-        throw Exception('Login gagal');
+        debugPrint('❌ User credential is null');
+        throw Exception('Login gagal: User credential null');
       }
       
-      // Get admin data from Realtime Database
+      debugPrint('✅ Step 1 Success: Firebase Auth login successful');
+      debugPrint('👤 User UID: ${userCredential.user!.uid}');
+      
+      // Step 2: Get admin data from Realtime Database
+      debugPrint('🔐 Step 2: Fetching admin data from Realtime Database...');
+      
       final snapshot = await _adminRef.get();
+      
       if (!snapshot.exists) {
-        throw Exception('Data admin tidak ditemukan');
+        debugPrint('❌ Admin node does not exist in database');
+        throw Exception('Data admin tidak ditemukan di database');
       }
+      
+      debugPrint('✅ Step 2 Success: Admin data exists');
       
       final adminData = snapshot.value as Map<dynamic, dynamic>;
+      debugPrint('📊 Admin data keys: ${adminData.keys.toList()}');
       
-      // Find admin by email
+      // Step 3: Find admin by email
+      debugPrint('🔐 Step 3: Searching for admin with email: $email');
+      
       AdminModel? admin;
       for (var entry in adminData.entries) {
+        debugPrint('🔍 Checking entry: ${entry.key}');
         final data = Map<String, dynamic>.from(entry.value);
+        debugPrint('  - Email in DB: ${data['email']}');
+        debugPrint('  - Match: ${data['email'] == email}');
+        
         if (data['email'] == email) {
           admin = AdminModel.fromJson(entry.key, data);
+          debugPrint('✅ Step 3 Success: Admin found!');
+          debugPrint('👤 Admin name: ${admin.nama}');
+          debugPrint('🏥 Loket ID: ${admin.loketId}');
           break;
         }
       }
       
       if (admin == null) {
-        throw Exception('Admin tidak ditemukan');
+        debugPrint('❌ Admin not found in database for email: $email');
+        throw Exception('Admin dengan email $email tidak terdaftar di database');
       }
       
+      debugPrint('🎉 Login successful!');
       return admin;
+      
     } on FirebaseAuthException catch (e) {
+      debugPrint('❌ FirebaseAuthException: ${e.code}');
+      debugPrint('❌ Message: ${e.message}');
+      
       if (e.code == 'user-not-found') {
         throw Exception('Email tidak terdaftar');
       } else if (e.code == 'wrong-password') {
@@ -60,10 +90,21 @@ class AuthService {
         throw Exception('Format email tidak valid');
       } else if (e.code == 'user-disabled') {
         throw Exception('Akun dinonaktifkan');
+      } else if (e.code == 'network-request-failed') {
+        throw Exception('Tidak ada koneksi internet');
+      } else if (e.code == 'too-many-requests') {
+        throw Exception('Terlalu banyak percobaan login. Coba lagi nanti');
       } else {
-        throw Exception('Login gagal: ${e.message}');
+        throw Exception('Login gagal: ${e.message ?? e.code}');
       }
     } catch (e) {
+      debugPrint('❌ General Exception: $e');
+      
+      // Re-throw if already an Exception with message
+      if (e is Exception) {
+        rethrow;
+      }
+      
       throw Exception('Terjadi kesalahan: $e');
     }
   }
@@ -90,6 +131,7 @@ class AuthService {
       
       return null;
     } catch (e) {
+      debugPrint('Error getting admin by email: $e');
       return null;
     }
   }

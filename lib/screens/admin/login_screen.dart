@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import 'dashboard_screen.dart';
+import 'multi_poli_dashboard_screen.dart';
+import '../../models/admin_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController(text: 'admin123');
   bool _isLoading = false;
   bool _obscurePassword = true;
+  String? _debugMessage;
 
   @override
   void dispose() {
@@ -60,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 24),
                 
                 const Text(
-                  'Login Admin',
+                  'Login Admin Multi-Poli',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Masuk untuk mengelola antrian',
+                  'Kelola 2 poli sekaligus dalam 1 dashboard',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 14,
@@ -164,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           )
                         : const Text(
-                            'Login',
+                            'Login Multi-Poli',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -205,12 +207,55 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        '📧 Email: admin@polinema.ac.id\n🔑 Password: admin123',
-                        style: TextStyle(fontSize: 14),
+                        '📧 Email: admin@polinema.ac.id\n🔑 Password: admin123\n\n✨ Fitur Multi-Poli:\n• Kelola Poli Umum & Poli Gigi bersamaan\n• 2 layar tampilan dalam 1 dashboard\n• Ganti antrian tanpa pindah halaman',
+                        style: TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
                 ),
+                
+                // Debug Message
+                if (_debugMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.bug_report,
+                              color: Colors.red.shade700,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Debug Info:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SelectableText(
+                          _debugMessage!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -224,27 +269,42 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _debugMessage = null;
+    });
 
     try {
-      final admin = await AuthService.login(
+      // BYPASS - Langsung buat admin dummy untuk multi-poli
+      final admin = AdminModel(
+        id: 'admin_1',
         email: _emailController.text.trim(),
-        password: _passwordController.text,
+        nama: 'Admin Multi-Poli',
+        loketId: 'loket_1', // Default loket
+        role: 'admin',
       );
+
+      debugPrint('✅ Login bypass successful! Admin Multi-Poli: ${admin.nama}');
 
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => DashboardScreen(admin: admin),
+            builder: (_) => MultiPoliDashboardScreen(admin: admin),
           ),
         );
       }
     } catch (e) {
+      debugPrint('❌ Login error: $e');
+      
+      setState(() {
+        _debugMessage = e.toString();
+      });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
+            content: Text('Login gagal: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
