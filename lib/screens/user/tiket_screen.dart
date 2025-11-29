@@ -41,20 +41,68 @@ class TiketScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.blue.shade700,
         appBar: AppBar(
-          title: const Text('Nomor Antrian Anda'),
+          leading: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RoleSelectionScreen(),
+                  ),
+                  (route) => false,
+                );
+              },
+              padding: EdgeInsets.zero,
+            ),
+          ),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.confirmation_number_rounded, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nomor Antrian',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  Text(
+                    'Antrian Anda',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           backgroundColor: Colors.blue.shade800,
           foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
-                (route) => false,
-              );
-            },
-          ),
+          elevation: 4,
+          shadowColor: Colors.blue.withOpacity(0.5),
+          centerTitle: true,
+          toolbarHeight: 70,
         ),
         body: StreamBuilder<AntrianModel?>(
           stream: FirebaseService.getAntrianByNomorStream(
@@ -86,42 +134,25 @@ class TiketScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        // Info Header
+                        // Info Header - Gambar saja
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.local_hospital,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Poliklinik POLINEMA',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                layanan.nama,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.asset(
+                              layanan.nama == 'Gigi'
+                                  ? 'assets/images/poli_gigi.png'
+                                  : 'assets/images/umum.png',
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 10),
 
                         // Main Ticket Card
                         Container(
