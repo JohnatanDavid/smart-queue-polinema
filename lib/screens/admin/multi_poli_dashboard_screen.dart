@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../../models/admin_model.dart';
 import '../../models/loket_model.dart';
 import '../../models/layanan_model.dart';
@@ -12,14 +13,12 @@ import 'display_screen.dart';
 
 class MultiPoliDashboardScreen extends StatefulWidget {
   final AdminModel admin;
-  
-  const MultiPoliDashboardScreen({
-    super.key,
-    required this.admin,
-  });
+
+  const MultiPoliDashboardScreen({super.key, required this.admin});
 
   @override
-  State<MultiPoliDashboardScreen> createState() => _MultiPoliDashboardScreenState();
+  State<MultiPoliDashboardScreen> createState() =>
+      _MultiPoliDashboardScreenState();
 }
 
 class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
@@ -39,10 +38,7 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
               _showDisplayOptions(context);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleLogout,
-          ),
+          IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout),
         ],
       ),
       body: Column(
@@ -84,16 +80,13 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
                   const SizedBox(height: 4),
                   const Text(
                     'Admin Multi-Poli',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
               ),
             ),
           ),
-          
+
           // Dual Screen Layout
           Expanded(
             child: Row(
@@ -106,13 +99,10 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
                     accentColor: Colors.blue,
                   ),
                 ),
-                
+
                 // Divider
-                Container(
-                  width: 2,
-                  color: Colors.grey.shade300,
-                ),
-                
+                Container(width: 2, color: Colors.grey.shade300),
+
                 // LAYAR KANAN - Poli Gigi
                 Expanded(
                   child: _PoliPanel(
@@ -140,10 +130,7 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
           children: [
             const Text(
               'Pilih Display Poli',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -254,7 +241,7 @@ class _PoliPanel extends StatelessWidget {
             }),
             builder: (context, layananSnapshot) {
               final layanan = layananSnapshot.data;
-              
+
               return SingleChildScrollView(
                 child: Column(
                   children: [
@@ -309,14 +296,14 @@ class _PoliPanel extends StatelessWidget {
                           // Statistik
                           if (layanan != null)
                             FutureBuilder<Map<String, int>>(
-                              future: FirebaseService.getStatistikAntrian(layanan.id),
+                              future: FirebaseService.getStatistikAntrian(
+                                layanan.id,
+                              ),
                               builder: (context, statsSnapshot) {
-                                final stats = statsSnapshot.data ?? {
-                                  'total': 0,
-                                  'menunggu': 0,
-                                  'selesai': 0,
-                                };
-                                
+                                final stats =
+                                    statsSnapshot.data ??
+                                    {'total': 0, 'menunggu': 0, 'selesai': 0};
+
                                 return Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
@@ -331,7 +318,8 @@ class _PoliPanel extends StatelessWidget {
                                     ],
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
                                     children: [
                                       _MiniStatItem(
                                         label: 'Total',
@@ -364,7 +352,8 @@ class _PoliPanel extends StatelessWidget {
                                 layanan.id,
                               ),
                               builder: (context, currentAntrianSnapshot) {
-                                final currentAntrian = currentAntrianSnapshot.data;
+                                final currentAntrian =
+                                    currentAntrianSnapshot.data;
 
                                 return Container(
                                   padding: const EdgeInsets.all(16),
@@ -471,19 +460,13 @@ class _MiniStatItem extends StatelessWidget {
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
       ],
     );
   }
 }
 
-class _ActionButtonsCompact extends StatelessWidget {
+class _ActionButtonsCompact extends StatefulWidget {
   final LoketModel loket;
   final LayananModel layanan;
   final Color accentColor;
@@ -495,9 +478,42 @@ class _ActionButtonsCompact extends StatelessWidget {
   });
 
   @override
+  State<_ActionButtonsCompact> createState() => _ActionButtonsCompactState();
+}
+
+class _ActionButtonsCompactState extends State<_ActionButtonsCompact> {
+  final FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    await flutterTts.setLanguage("id-ID"); // Bahasa Indonesia
+    await flutterTts.setSpeechRate(0.85); // Kecepatan bicara lebih natural
+    await flutterTts.setVolume(1.0); // Volume maksimal
+    await flutterTts.setPitch(1.0); // Nada suara normal
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<AntrianModel?>(
-      stream: FirebaseService.getAntrianDiLoketStream(loket.id, layanan.id),
+      stream: FirebaseService.getAntrianDiLoketStream(
+        widget.loket.id,
+        widget.layanan.id,
+      ),
       builder: (context, snapshot) {
         final currentAntrian = snapshot.data;
         final hasCurrentAntrian = currentAntrian != null;
@@ -508,9 +524,11 @@ class _ActionButtonsCompact extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: hasCurrentAntrian ? null : () => _panggilBerikutnya(context),
+                onPressed: hasCurrentAntrian
+                    ? null
+                    : () => _panggilBerikutnya(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
+                  backgroundColor: widget.accentColor,
                   disabledBackgroundColor: Colors.grey.shade300,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -538,7 +556,7 @@ class _ActionButtonsCompact extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             if (hasCurrentAntrian) ...[
               const SizedBox(height: 8),
               Row(
@@ -552,7 +570,10 @@ class _ActionButtonsCompact extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text('Ulang', style: TextStyle(fontSize: 12)),
+                      child: const Text(
+                        'Ulang',
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -583,8 +604,10 @@ class _ActionButtonsCompact extends StatelessWidget {
 
   Future<void> _panggilBerikutnya(BuildContext context) async {
     try {
-      final antrianList = await FirebaseService.getAntrianMenungguStream(layanan.id).first;
-      
+      final antrianList = await FirebaseService.getAntrianMenungguStream(
+        widget.layanan.id,
+      ).first;
+
       if (antrianList.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -601,18 +624,30 @@ class _ActionButtonsCompact extends StatelessWidget {
 
       await FirebaseService.updateStatusAntrian(
         nomorAntrian: nextAntrian.nomorAntrian,
-        layananId: layanan.id,
+        layananId: widget.layanan.id,
         status: StatusAntrian.dipanggil,
-        loketId: loket.id,
+        loketId: widget.loket.id,
       );
 
-      await FirebaseService.updateLoketAntrian(loket.id, nextAntrian.nomorAntrian);
+      await FirebaseService.updateLoketAntrian(
+        widget.loket.id,
+        nextAntrian.nomorAntrian,
+      );
+
+      // Panggil dengan suara
+      String announcement =
+          "Nomor antrian ${nextAntrian.nomorAntrian}, "
+          "atas nama ${nextAntrian.namaPasien}, "
+          "silakan menuju ${widget.layanan.nama}";
+
+      await _speak(announcement);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Memanggil ${nextAntrian.nomorAntrian}'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -626,11 +661,20 @@ class _ActionButtonsCompact extends StatelessWidget {
   }
 
   Future<void> _panggilUlang(BuildContext context, AntrianModel antrian) async {
+    // Panggil ulang dengan suara
+    String announcement =
+        "Nomor antrian ${antrian.nomorAntrian}, "
+        "atas nama ${antrian.namaPasien}, "
+        "silakan menuju ${widget.layanan.nama}";
+
+    await _speak(announcement);
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Memanggil ulang ${antrian.nomorAntrian}'),
           backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -640,11 +684,11 @@ class _ActionButtonsCompact extends StatelessWidget {
     try {
       await FirebaseService.updateStatusAntrian(
         nomorAntrian: antrian.nomorAntrian,
-        layananId: layanan.id,
+        layananId: widget.layanan.id,
         status: StatusAntrian.selesai,
       );
 
-      await FirebaseService.updateLoketAntrian(loket.id, null);
+      await FirebaseService.updateLoketAntrian(widget.loket.id, null);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -668,10 +712,7 @@ class _CompactQueueList extends StatelessWidget {
   final String layananId;
   final Color accentColor;
 
-  const _CompactQueueList({
-    required this.layananId,
-    required this.accentColor,
-  });
+  const _CompactQueueList({required this.layananId, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -704,48 +745,62 @@ class _CompactQueueList extends StatelessWidget {
           children: [
             Text(
               'Antrian Menunggu (${menunggu.length})',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...menunggu.take(5).map((antrian) => Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: accentColor.withOpacity(0.2),
-                    child: Text(
-                      antrian.nomorUrut.toString(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: accentColor,
-                      ),
+            ...menunggu
+                .take(5)
+                .map(
+                  (antrian) => Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          antrian.nomorAntrian,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: accentColor.withOpacity(0.2),
+                          child: Text(
+                            antrian.nomorUrut.toString(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                antrian.nomorAntrian,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                antrian.namaPasien,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Text(
-                          antrian.namaPasien,
+                          Helpers.formatTime(
+                            DateTime.fromMillisecondsSinceEpoch(
+                              antrian.waktuAmbil,
+                            ),
+                          ),
                           style: TextStyle(
                             fontSize: 10,
                             color: Colors.grey.shade600,
@@ -754,18 +809,7 @@ class _CompactQueueList extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Text(
-                    Helpers.formatTime(
-                      DateTime.fromMillisecondsSinceEpoch(antrian.waktuAmbil),
-                    ),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            )),
+                ),
           ],
         );
       },
