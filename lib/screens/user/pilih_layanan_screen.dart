@@ -5,6 +5,7 @@ import '../../services/firebase_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/constants.dart';
 import 'tiket_screen.dart';
+import 'package:lottie/lottie.dart';
 
 class PilihLayananScreen extends StatelessWidget {
   const PilihLayananScreen({super.key});
@@ -295,9 +296,9 @@ class PilihLayananScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // Tips Cards - Horizontal Scroll (TETAP SAMA)
+                // Tips Cards - Horizontal Scroll
                 SizedBox(
-                  height: 200,
+                  height: 240, // Tingkatkan height untuk gambar
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -306,7 +307,7 @@ class PilihLayananScreen extends StatelessWidget {
                         title: 'Sikat Gigi 2x Sehari',
                         description:
                             'Sikat gigi minimal 2 menit setelah sarapan dan sebelum tidur menggunakan pasta gigi berfluoride.',
-                        icon: Icons.emoji_emotions_outlined,
+                        imageUrl: 'assets/images/gosok1.png',
                         color: Colors.blue,
                       ),
                       const SizedBox(width: 16),
@@ -314,7 +315,7 @@ class PilihLayananScreen extends StatelessWidget {
                         title: 'Periksa Gigi 6 Bulan Sekali',
                         description:
                             'Kunjungi dokter gigi setiap 6 bulan untuk pembersihan karang gigi dan deteksi dini masalah gigi.',
-                        icon: Icons.event_available,
+                        imageUrl: 'assets/images/GIGI1.png',
                         color: const Color(0xFF10B981),
                       ),
                       const SizedBox(width: 16),
@@ -322,7 +323,7 @@ class PilihLayananScreen extends StatelessWidget {
                         title: 'Jaga Pola Hidup Sehat',
                         description:
                             'Konsumsi makanan bergizi, minum air 8 gelas/hari, olahraga teratur, dan istirahat cukup.',
-                        icon: Icons.favorite_border,
+                        imageUrl: 'assets/images/gizi1.png',
                         color: Colors.purple,
                       ),
                     ],
@@ -520,13 +521,20 @@ class PilihLayananScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(strokeWidth: 3),
+              // Lottie Animation untuk loading/processing
+              Lottie.asset(
+                'assets/lottie/Market.json', // atau 'processing.json', 'spinner.json'
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Memproses...',
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontWeight: FontWeight.w500,
+                  fontSize: 15,
                 ),
               ),
             ],
@@ -670,13 +678,13 @@ class PilihLayananScreen extends StatelessWidget {
 class _TipsCard extends StatelessWidget {
   final String title;
   final String description;
-  final IconData icon;
+  final String imageUrl;
   final Color color;
 
   const _TipsCard({
     required this.title,
     required this.description,
-    required this.icon,
+    required this.imageUrl,
     required this.color,
   });
 
@@ -684,12 +692,13 @@ class _TipsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 280,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -698,51 +707,54 @@ class _TipsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon Header
+          // Gambar
           Container(
-            height: 80,
+            height: 100,
+            width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color.withOpacity(0.8), color],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback ke icon jika gambar tidak ada
+                  return Icon(
+                    Icons.image_not_supported,
+                    size: 50,
+                    color: color.withOpacity(0.5),
+                  );
+                },
               ),
             ),
-            child: Center(child: Icon(icon, size: 40, color: Colors.white)),
           ),
-
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                    height: 1.4,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const SizedBox(height: 12),
+          // Title
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          // Description
+          Expanded(
+            child: Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
