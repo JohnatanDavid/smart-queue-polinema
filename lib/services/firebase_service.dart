@@ -228,6 +228,18 @@ class FirebaseService {
   }
   
   // ==================== LOKET ====================
+
+  /// Get all lokets (streaming) -> Method baru untuk halaman Selection
+  static Stream<List<LoketModel>> getLoketStream() {
+    return _loketRef.onValue.map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data == null) return [];
+
+      return data.entries.map((entry) {
+        return LoketModel.fromJson(Map<String, dynamic>.from(entry.value));
+      }).toList();
+    });
+  }
   
   /// Get loket by ID (streaming)
   static Stream<LoketModel?> getLoketByIdStream(String loketId) {

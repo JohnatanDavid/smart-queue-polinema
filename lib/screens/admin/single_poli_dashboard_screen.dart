@@ -11,22 +11,24 @@ import '../../utils/helpers.dart';
 import '../role_selection_screen.dart';
 import 'display_screen.dart';
 
-class MultiPoliDashboardScreen extends StatefulWidget {
+class SinglePoliDashboardScreen extends StatefulWidget {
   final AdminModel admin;
+  final String selectedLoketId;
 
-  const MultiPoliDashboardScreen({super.key, required this.admin});
+  const SinglePoliDashboardScreen({
+    super.key, required this.admin, required this.selectedLoketId
+  });
 
   @override
-  State<MultiPoliDashboardScreen> createState() =>
-      _MultiPoliDashboardScreenState();
+  State<SinglePoliDashboardScreen> createState() =>_SinglePoliDashboardScreenState();
 }
 
-class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
+class _SinglePoliDashboardScreenState extends State<SinglePoliDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Multi-Poli Dashboard'),
+        title: Text('Dashboard ${widget.admin.nama}'),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -79,7 +81,7 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Admin Multi-Poli',
+                    'Admin Poli',
                     style: TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
@@ -87,31 +89,12 @@ class _MultiPoliDashboardScreenState extends State<MultiPoliDashboardScreen> {
             ),
           ),
 
-          // Dual Screen Layout
+          // CONTENT UTAMA: Langsung panggil _PoliPanel
           Expanded(
-            child: Row(
-              children: [
-                // LAYAR KIRI - Poli Umum
-                Expanded(
-                  child: _PoliPanel(
-                    loketId: 'loket_1',
-                    backgroundColor: Colors.blue.shade50,
-                    accentColor: Colors.blue,
-                  ),
-                ),
-
-                // Divider
-                Container(width: 2, color: Colors.grey.shade300),
-
-                // LAYAR KANAN - Poli Gigi
-                Expanded(
-                  child: _PoliPanel(
-                    loketId: 'loket_2',
-                    backgroundColor: Colors.green.shade50,
-                    accentColor: Colors.green,
-                  ),
-                ),
-              ],
+            child: _PoliPanel(
+              loketId: widget.selectedLoketId, // Gunakan ID yang dikirim dari halaman sebelumnya
+              backgroundColor: Colors.white,
+              accentColor: Colors.blue, // Bisa dibuat dinamis berdasarkan jenis poli jika mau
             ),
           ),
         ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import 'multi_poli_dashboard_screen.dart';
 import '../../models/admin_model.dart';
+import 'loket_selection_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Kelola 2 poli sekaligus dalam 1 dashboard',
+                  'Pilih poli yang akan anda kelola setelah login',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
@@ -339,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => MultiPoliDashboardScreen(admin: admin),
+            builder: (_) => LoketSelectionScreen(admin: admin),
           ),
         );
       }
