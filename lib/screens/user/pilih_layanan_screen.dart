@@ -172,97 +172,166 @@ class PilihLayananScreen extends StatelessWidget {
             );
           }
 
-          return Column(
-            children: [
-              // Header Image Card
-              Container(
-                width: double.infinity,
-                height: 200,
-                margin: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/images/sistem.png', // Ganti dengan nama file gambar Anda
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.blue.shade600,
-                              Colors.blue.shade400,
-                            ],
+          return SingleChildScrollView(
+            // Tambahkan ini - scroll untuk seluruh halaman
+            child: Column(
+              children: [
+                // Header Image Card
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  margin: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/images/sistem.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.blue.shade600,
+                                Colors.blue.shade400,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
 
-              // Section Title
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 4,
-                      height: 24,
-                      decoration: BoxDecoration(
+                // Section Title
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Layanan Tersedia',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Layanan Cards - UBAH DARI Flexible + ListView.builder MENJADI Column
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    // Ganti jadi Column
+                    children: layananList.map((layanan) {
+                      // Gunakan .map()
+                      final isOpen = Helpers.isJamOperasional(
+                        layanan.jamBuka,
+                        layanan.jamTutup,
+                      );
+
+                      return _LayananCard(
+                        layanan: layanan,
+                        isOpen: isOpen,
+                        onTap: () =>
+                            _showInputNamaDialog(context, layanan, isOpen),
+                      );
+                    }).toList(), // Jangan lupa .toList()
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Section Title - Tips Kesehatan
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Tips Kesehatan',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Tips Cards - Horizontal Scroll (TETAP SAMA)
+                SizedBox(
+                  height: 200,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    children: [
+                      _TipsCard(
+                        title: 'Sikat Gigi 2x Sehari',
+                        description:
+                            'Sikat gigi minimal 2 menit setelah sarapan dan sebelum tidur menggunakan pasta gigi berfluoride.',
+                        icon: Icons.emoji_emotions_outlined,
                         color: Colors.blue,
-                        borderRadius: BorderRadius.circular(2),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Layanan Tersedia',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
+                      const SizedBox(width: 16),
+                      _TipsCard(
+                        title: 'Periksa Gigi 6 Bulan Sekali',
+                        description:
+                            'Kunjungi dokter gigi setiap 6 bulan untuk pembersihan karang gigi dan deteksi dini masalah gigi.',
+                        icon: Icons.event_available,
+                        color: const Color(0xFF10B981),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 16),
+                      _TipsCard(
+                        title: 'Jaga Pola Hidup Sehat',
+                        description:
+                            'Konsumsi makanan bergizi, minum air 8 gelas/hari, olahraga teratur, dan istirahat cukup.',
+                        icon: Icons.favorite_border,
+                        color: Colors.purple,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
-
-              // Layanan Cards
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  itemCount: layananList.length,
-                  itemBuilder: (context, index) {
-                    final layanan = layananList[index];
-                    final isOpen = Helpers.isJamOperasional(
-                      layanan.jamBuka,
-                      layanan.jamTutup,
-                    );
-
-                    return _LayananCard(
-                      layanan: layanan,
-                      isOpen: isOpen,
-                      onTap: () =>
-                          _showInputNamaDialog(context, layanan, isOpen),
-                    );
-                  },
-                ),
-              ),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           );
         },
       ),
@@ -595,6 +664,90 @@ class PilihLayananScreen extends StatelessWidget {
         );
       }
     }
+  }
+}
+
+class _TipsCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const _TipsCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon Header
+          Container(
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.8), color],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Center(child: Icon(icon, size: 40, color: Colors.white)),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

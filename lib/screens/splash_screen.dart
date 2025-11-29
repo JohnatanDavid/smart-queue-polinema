@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
           OnboardingPageModel(
             title: 'Smart Queue',
             description: 'Sistem antrian digital untuk kemudahan layanan Anda',
-            imageUrl: 'assets/images/onboarding1.png',
+            imageUrl: 'assets/images/Slide01.png',
             bgColor: Colors.blue.shade400,
           ),
           OnboardingPageModel(
