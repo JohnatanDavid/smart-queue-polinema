@@ -101,7 +101,8 @@ flutter:
     - assets/images/gizi.png
     - assets/images/gizi1.png
     - assets/images/GIGI1.png
-
+    - assets/images/Loket1.png
+    - assets/images/Loket2.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

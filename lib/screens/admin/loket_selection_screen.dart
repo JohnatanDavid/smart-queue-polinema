@@ -1,146 +1,903 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../../models/admin_model.dart';
 import '../../models/loket_model.dart';
 import '../../models/layanan_model.dart';
 import '../../services/firebase_service.dart';
-import 'single_poli_dashboard_screen.dart'; // File dashboard yang baru (lihat poin 2)
+import 'single_poli_dashboard_screen.dart';
 
-class LoketSelectionScreen extends StatelessWidget {
+class LoketSelectionScreen extends StatefulWidget {
   final AdminModel admin;
 
   const LoketSelectionScreen({super.key, required this.admin});
 
   @override
+  State<LoketSelectionScreen> createState() => _LoketSelectionScreenState();
+}
+
+class _LoketSelectionScreenState extends State<LoketSelectionScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  String _getQuoteOfTheDay() {
+    final quotes = [
+      "Senyum adalah pelayanan terbaik yang bisa kita berikan",
+      "Kesabaran adalah kunci untuk memberikan layanan yang berkualitas",
+      "Setiap pasien adalah prioritas, layani dengan sepenuh hati",
+      "Keramahan Anda adalah obat pertama bagi pasien",
+      "Pelayanan terbaik dimulai dari sikap positif kita",
+      "Jadilah cahaya harapan bagi setiap pasien yang datang",
+      "Empati adalah jembatan menuju pelayanan yang luar biasa",
+      "Profesionalisme dimulai dari hal-hal kecil yang kita lakukan",
+      "Setiap interaksi adalah kesempatan untuk membuat perbedaan",
+      "Kepedulian Anda hari ini adalah kenangan pasien selamanya",
+    ];
+
+    // Menggunakan hari dalam tahun untuk mendapatkan quote yang konsisten per hari
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    final index = dayOfYear % quotes.length;
+
+    return quotes[index];
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pilih Loket Bertugas'),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Halo, ${admin.nama}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const Text('Silakan pilih loket tempat Anda bertugas hari ini:'),
-            const SizedBox(height: 20),
-            
-            // List Loket dari Firebase
-            Expanded(
-              child: StreamBuilder<List<LoketModel>>(
-                stream: FirebaseService.getLoketStream(), // Pastikan method ini ada di service Anda
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("Tidak ada loket tersedia"));
-                  }
-
-                  final lokets = snapshot.data!;
-
-                  return GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // 2 kotak per baris
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 1.2,
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: CustomScrollView(
+        slivers: [
+          // Custom App Bar
+          SliverAppBar(
+            expandedHeight: 200,
+            floating: false,
+            pinned: true,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.blue.shade700, Colors.blue.shade500],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Animated Background Circles
+                    Positioned(
+                      right: -50,
+                      top: -50,
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
                     ),
-                    itemCount: lokets.length,
-                    itemBuilder: (context, index) {
-                      final loket = lokets[index];
-                      return _LoketCard(
-                        loket: loket,
-                        admin: admin,
-                      );
-                    },
-                  );
-                },
+                    Positioned(
+                      left: -30,
+                      top: 100,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                    ),
+                    // Content
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Hero(
+                                  tag: 'admin_avatar',
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 32,
+                                      backgroundColor: Colors.white,
+                                      child: Text(
+                                        widget.admin.nama[0].toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Selamat Datang,',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white70,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        widget.admin.nama,
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          SliverToBoxAdapter(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Info Card - White Design
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 0, 179, 255),
+                                  Color.fromARGB(255, 13, 109, 192),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.info_outline_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Pilih Loket',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey.shade900,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Pilih loket tempat Anda bertugas hari ini',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Section Title
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade700,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Loket Tersedia',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Loket Grid
+                    StreamBuilder<List<LoketModel>>(
+                      stream: FirebaseService.getLoketStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Container(
+                            height: 400,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: const SizedBox(
+                                      width: 40,
+                                      height: 40,
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Memuat loket...',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Container(
+                            height: 400,
+                            padding: const EdgeInsets.all(40),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.computer_outlined,
+                                      size: 64,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    'Tidak ada loket tersedia',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Hubungi administrator untuk informasi lebih lanjut',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        final lokets = snapshot.data!;
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.75,
+                              ),
+                          itemCount: lokets.length,
+                          itemBuilder: (context, index) {
+                            return _LoketCard(
+                              loket: lokets[index],
+                              admin: widget.admin,
+                              index: index,
+                            );
+                          },
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 💬 Motivational Quote Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Colors.blue.shade600, Colors.blue.shade400],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.format_quote_rounded,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Quote Hari Ini',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _getQuoteOfTheDay(),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.white,
+                              height: 1.6,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            height: 2,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Section Title untuk Card Lottie
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade700,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Semangat Hari Ini',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.emoji_emotions_rounded,
+                          color: Colors.amber.shade600,
+                          size: 26,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 🔥 CARD Pembungkus Lottie + Selamat Bekerja (dipindah ke bawah)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 15,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 250,
+                            child: Lottie.network(
+                              'https://lottie.host/b2f5646d-70f8-4f67-b7e7-ce23296229c8/zReykplI5p.json',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          const Text(
+                            'Selamat bekerja 👋',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          Text(
+                            'Semoga tugas Anda hari ini berjalan lancar.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                              height: 1.4,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _LoketCard extends StatelessWidget {
+class _LoketCard extends StatefulWidget {
   final LoketModel loket;
   final AdminModel admin;
+  final int index;
 
-  const _LoketCard({required this.loket, required this.admin});
+  const _LoketCard({
+    required this.loket,
+    required this.admin,
+    required this.index,
+  });
+
+  @override
+  State<_LoketCard> createState() => _LoketCardState();
+}
+
+class _LoketCardState extends State<_LoketCard>
+    with SingleTickerProviderStateMixin {
+  bool _isPressed = false;
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  String _getBackgroundImage(String nama) {
+    nama = nama.toLowerCase();
+    if (nama.contains('gigi')) return 'assets/images/Loket2.png';
+    if (nama.contains('umum')) return 'assets/images/Loket1.png';
+    return 'assets/bg_default.jpg';
+  }
+
+  IconData _getIconByLayanan(String namaLayanan) {
+    final nama = namaLayanan.toLowerCase();
+    if (nama.contains('gigi')) return Icons.medical_services;
+    if (nama.contains('umum')) return Icons.local_hospital;
+    if (nama.contains('anak')) return Icons.child_care;
+    if (nama.contains('mata')) return Icons.visibility;
+    if (nama.contains('jantung')) return Icons.favorite;
+    return Icons.local_hospital_outlined;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Kita ambil info layanan untuk menampilkan nama poli (misal: "Poli Umum")
     return StreamBuilder<List<LayananModel>>(
       stream: FirebaseService.getLayananStream(),
       builder: (context, snapshot) {
         String namaLayanan = 'Memuat...';
-        Color warnaKartu = Colors.blue.shade100;
-        
+        IconData iconLayanan = Icons.computer;
+
         if (snapshot.hasData) {
           final layanan = snapshot.data!.firstWhere(
-            (l) => l.id == loket.layananId,
-            // PERBAIKAN DI SINI:
+            (l) => l.id == widget.loket.layananId,
             orElse: () => LayananModel(
               id: 'unknown',
               nama: 'Layanan Tidak Dikenal',
               kode: '?',
-              jamBuka: '00:00',      // Wajib diisi (required)
-              jamTutup: '00:00',     // Wajib diisi (required)
-              estimasiPerPasien: 0,  // Wajib diisi (required)
-              aktif: false,          // Wajib diisi (required)
+              jamBuka: '00:00',
+              jamTutup: '00:00',
+              estimasiPerPasien: 0,
+              aktif: false,
             ),
           );
           namaLayanan = layanan.nama;
-          // Logika sederhana untuk warna pembeda
-          if (layanan.nama.toLowerCase().contains('gigi')) {
-             warnaKartu = Colors.green.shade100;
-          }
+          iconLayanan = _getIconByLayanan(namaLayanan);
         }
 
-        return Card(
-          color: warnaKartu,
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: InkWell(
+        return ScaleTransition(
+          scale: _scaleAnimation,
+          child: GestureDetector(
+            onTapDown: (_) {
+              setState(() => _isPressed = true);
+              _scaleController.forward();
+            },
+            onTapUp: (_) {
+              setState(() => _isPressed = false);
+              _scaleController.reverse();
+            },
+            onTapCancel: () {
+              setState(() => _isPressed = false);
+              _scaleController.reverse();
+            },
             onTap: () {
-              // NAVIGASI KE DASHBOARD TUNGGAL
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => SinglePoliDashboardScreen(
-                    admin: admin,
-                    selectedLoketId: loket.id, // KITA KIRIM ID LOKET YANG DIPILIH
-                  ),
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      SinglePoliDashboardScreen(
+                        admin: widget.admin,
+                        selectedLoketId: widget.loket.id,
+                      ),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.computer, size: 40, color: Colors.black54),
-                  const SizedBox(height: 10),
-                  Text(
-                    loket.nama, // Misal: "Loket 1"
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  Text(
-                    namaLayanan, // Misal: "Poli Umum"
-                    style: TextStyle(color: Colors.grey.shade700),
-                    textAlign: TextAlign.center,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: _isPressed ? 8 : 16,
+                    offset: _isPressed
+                        ? const Offset(0, 2)
+                        : const Offset(0, 8),
+                    spreadRadius: _isPressed ? 0 : 2,
                   ),
                 ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(_getBackgroundImage(namaLayanan)),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.15),
+                        BlendMode.darken,
+                      ),
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Background pattern
+                      Positioned(
+                        right: -40,
+                        top: -40,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: -20,
+                        bottom: -20,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
+                          ),
+                        ),
+                      ),
+
+                      // Status Badge
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                'Aktif',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Content
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Spacer(),
+
+                            // Icon with Glow Effect
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.25),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.3),
+                                    blurRadius: 20,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                iconLayanan,
+                                size: 48,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Loket Number
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.0),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                widget.loket.nama,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Layanan Name
+                            Text(
+                              namaLayanan,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.95),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const Spacer(),
+
+                            // Action Button
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.25),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Pilih Loket',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

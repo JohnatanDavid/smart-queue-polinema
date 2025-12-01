@@ -16,11 +16,14 @@ class SinglePoliDashboardScreen extends StatefulWidget {
   final String selectedLoketId;
 
   const SinglePoliDashboardScreen({
-    super.key, required this.admin, required this.selectedLoketId
+    super.key,
+    required this.admin,
+    required this.selectedLoketId,
   });
 
   @override
-  State<SinglePoliDashboardScreen> createState() =>_SinglePoliDashboardScreenState();
+  State<SinglePoliDashboardScreen> createState() =>
+      _SinglePoliDashboardScreenState();
 }
 
 class _SinglePoliDashboardScreenState extends State<SinglePoliDashboardScreen> {
@@ -92,9 +95,11 @@ class _SinglePoliDashboardScreenState extends State<SinglePoliDashboardScreen> {
           // CONTENT UTAMA: Langsung panggil _PoliPanel
           Expanded(
             child: _PoliPanel(
-              loketId: widget.selectedLoketId, // Gunakan ID yang dikirim dari halaman sebelumnya
+              loketId: widget
+                  .selectedLoketId, // Gunakan ID yang dikirim dari halaman sebelumnya
               backgroundColor: Colors.white,
-              accentColor: Colors.blue, // Bisa dibuat dinamis berdasarkan jenis poli jika mau
+              accentColor: Colors
+                  .blue, // Bisa dibuat dinamis berdasarkan jenis poli jika mau
             ),
           ),
         ],
