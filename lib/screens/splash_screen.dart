@@ -23,8 +23,7 @@ class SplashScreen extends StatelessWidget {
           ),
           OnboardingPageModel(
             title: 'Pantau Antrian Real-time',
-            description:
-                'Lihat posisi antrian Anda secara real-time kapan saja',
+            description: 'Lihat posisi antrian Anda secara real-time',
             imageUrl: 'assets/images/Slide02.png',
             bgColor: Colors.blue.shade600,
           ),

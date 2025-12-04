@@ -19,6 +19,21 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late PageController _quotePageController;
+  int _currentQuoteIndex = 0;
+
+  final List<String> _quotes = [
+    "Senyum adalah pelayanan terbaik yang bisa kita berikan",
+    "Kesabaran adalah kunci untuk memberikan layanan yang berkualitas",
+    "Setiap pasien adalah prioritas, layani dengan sepenuh hati",
+    "Keramahan Anda adalah obat pertama bagi pasien",
+    "Pelayanan terbaik dimulai dari sikap positif kita",
+    "Jadilah cahaya harapan bagi setiap pasien yang datang",
+    "Empati adalah jembatan menuju pelayanan yang luar biasa",
+    "Profesionalisme dimulai dari hal-hal kecil yang kita lakukan",
+    "Setiap interaksi adalah kesempatan untuk membuat perbedaan",
+    "Kepedulian Anda hari ini adalah kenangan pasien selamanya",
+  ];
 
   @override
   void initState() {
@@ -31,34 +46,16 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
     _animationController.forward();
+
+    // Initialize PageController untuk quote carousel
+    _quotePageController = PageController();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _quotePageController.dispose();
     super.dispose();
-  }
-
-  String _getQuoteOfTheDay() {
-    final quotes = [
-      "Senyum adalah pelayanan terbaik yang bisa kita berikan",
-      "Kesabaran adalah kunci untuk memberikan layanan yang berkualitas",
-      "Setiap pasien adalah prioritas, layani dengan sepenuh hati",
-      "Keramahan Anda adalah obat pertama bagi pasien",
-      "Pelayanan terbaik dimulai dari sikap positif kita",
-      "Jadilah cahaya harapan bagi setiap pasien yang datang",
-      "Empati adalah jembatan menuju pelayanan yang luar biasa",
-      "Profesionalisme dimulai dari hal-hal kecil yang kita lakukan",
-      "Setiap interaksi adalah kesempatan untuk membuat perbedaan",
-      "Kepedulian Anda hari ini adalah kenangan pasien selamanya",
-    ];
-
-    // Menggunakan hari dalam tahun untuk mendapatkan quote yang konsisten per hari
-    final now = DateTime.now();
-    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
-    final index = dayOfYear % quotes.length;
-
-    return quotes[index];
   }
 
   @override
@@ -239,7 +236,7 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Pilih Loket',
+                                  'Pilih Loket 🏷️',
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey.shade900,
@@ -385,17 +382,12 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
 
                         final lokets = snapshot.data!;
 
-                        return GridView.builder(
+                        return ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.75,
-                              ),
                           itemCount: lokets.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 16),
                           itemBuilder: (context, index) {
                             return _LoketCard(
                               loket: lokets[index],
@@ -409,10 +401,10 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
 
                     const SizedBox(height: 24),
 
-                    // 💬 Motivational Quote Card
+                    // 💬 Motivational Quote Card dengan Manual Swipe
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      height: 140, // 👈 Dikecilkan dari 180
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
@@ -430,50 +422,105 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
                       ),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
+                          Padding(
+                            padding: const EdgeInsets.all(
+                              16,
+                            ), // 👈 Dikecilkan dari 20
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(
+                                    10,
+                                  ), // 👈 Dikecilkan dari 12
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.format_quote_rounded,
+                                    color: Colors.white,
+                                    size: 22, // 👈 Dikecilkan dari 28
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.format_quote_rounded,
-                                  color: Colors.white,
-                                  size: 28,
+                                const SizedBox(
+                                  width: 10,
+                                ), // 👈 Dikecilkan dari 12
+                                const Text(
+                                  'Quote Hari Ini',
+                                  style: TextStyle(
+                                    fontSize: 14, // 👈 Dikecilkan dari 16
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Text(
-                                'Quote Hari Ini',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                const Spacer(),
+                                Icon(
+                                  Icons.swipe_rounded,
+                                  color: Colors.white.withOpacity(0.5),
+                                  size: 18, // 👈 Dikecilkan dari 20
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _getQuoteOfTheDay(),
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white,
-                              height: 1.6,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.w500,
+                              ],
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 12),
-                          Container(
-                            height: 2,
-                            width: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(1),
+                          Expanded(
+                            child: PageView.builder(
+                              controller: _quotePageController,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _currentQuoteIndex = index;
+                                });
+                              },
+                              itemCount: _quotes.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      _quotes[index],
+                                      style: const TextStyle(
+                                        fontSize: 13, // 👈 Dikecilkan dari 15
+                                        color: Colors.white,
+                                        height: 1.5, // 👈 Dikecilkan dari 1.6
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 3, // 👈 Batasi jumlah baris
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          // Indicator dots
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: 12,
+                            ), // 👈 Dikecilkan dari 16
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                _quotes.length,
+                                (index) => AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 3, // 👈 Dikecilkan dari 4
+                                  ),
+                                  width: _currentQuoteIndex == index
+                                      ? 20
+                                      : 6, // 👈 Dikecilkan dari 24:8
+                                  height: 6, // 👈 Dikecilkan dari 8
+                                  decoration: BoxDecoration(
+                                    color: _currentQuoteIndex == index
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -495,7 +542,7 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Semangat Hari Ini',
+                          'Semangat Hari Ini 🚀',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -512,7 +559,7 @@ class _LoketSelectionScreenState extends State<LoketSelectionScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // 🔥 CARD Pembungkus Lottie + Selamat Bekerja (dipindah ke bawah)
+                    // 🔥 CARD Pembungkus Lottie + Selamat Bekerja
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(22),
@@ -660,234 +707,360 @@ class _LoketCardState extends State<_LoketCard>
           iconLayanan = _getIconByLayanan(namaLayanan);
         }
 
-        return ScaleTransition(
-          scale: _scaleAnimation,
-          child: GestureDetector(
-            onTapDown: (_) {
-              setState(() => _isPressed = true);
-              _scaleController.forward();
-            },
-            onTapUp: (_) {
-              setState(() => _isPressed = false);
-              _scaleController.reverse();
-            },
-            onTapCancel: () {
-              setState(() => _isPressed = false);
-              _scaleController.reverse();
-            },
-            onTap: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      SinglePoliDashboardScreen(
-                        admin: widget.admin,
-                        selectedLoketId: widget.loket.id,
-                      ),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(1.0, 0.0);
-                        const end = Offset.zero;
-                        const curve = Curves.easeInOut;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
+        return Row(
+          children: [
+            // 👈 BAGIAN KIRI - Informasi Tambahan
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: 280,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: _isPressed ? 8 : 16,
-                    offset: _isPressed
-                        ? const Offset(0, 2)
-                        : const Offset(0, 8),
-                    spreadRadius: _isPressed ? 0 : 2,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(_getBackgroundImage(namaLayanan)),
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.15),
-                        BlendMode.darken,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Nomor Loket
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Loket ${widget.index + 1}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Background pattern
-                      Positioned(
-                        right: -40,
-                        top: -40,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: -20,
-                        bottom: -20,
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.08),
-                          ),
-                        ),
-                      ),
+                    const SizedBox(height: 16),
 
-                      // Status Badge
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
+                    // Nama Layanan
+                    Text(
+                      namaLayanan,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Info Status - Dinamis berdasarkan widget.loket.status
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'Aktif',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                            color: widget.loket.status == 'aktif'
+                                ? Colors.green.shade400
+                                : Colors.grey.shade400,
+                            shape: BoxShape.circle,
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.loket.status == 'aktif'
+                              ? 'Aktif'
+                              : 'Tidak Aktif',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
 
-                      // Content
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    // Divider
+                    Divider(color: Colors.grey.shade200),
+                    const SizedBox(height: 12),
+
+                    // Info Tambahan
+                    _buildInfoRow(
+                      Icons.access_time_rounded,
+                      'Buka',
+                      '08:00 - 16:00',
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Info Pasien - Dinamis dari widget.loket.antrianSaatIni
+                    _buildInfoRow(
+                      Icons.people_outline_rounded,
+                      'Pasien',
+                      widget.loket.antrianSaatIni != null
+                          ? 'No. ${widget.loket.antrianSaatIni}'
+                          : 'Tidak ada antrian',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            // 👉 BAGIAN KANAN - Card Loket (Ukuran sama seperti asli)
+            Expanded(
+              flex: 3,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: GestureDetector(
+                  onTapDown: (_) {
+                    setState(() => _isPressed = true);
+                    _scaleController.forward();
+                  },
+                  onTapUp: (_) {
+                    setState(() => _isPressed = false);
+                    _scaleController.reverse();
+                  },
+                  onTapCancel: () {
+                    setState(() => _isPressed = false);
+                    _scaleController.reverse();
+                  },
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            SinglePoliDashboardScreen(
+                              admin: widget.admin,
+                              selectedLoketId: widget.loket.id,
+                            ),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                              const begin = Offset(1.0, 0.0);
+                              const end = Offset.zero;
+                              const curve = Curves.easeInOut;
+                              var tween = Tween(
+                                begin: begin,
+                                end: end,
+                              ).chain(CurveTween(curve: curve));
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 280,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: _isPressed ? 8 : 16,
+                          offset: _isPressed
+                              ? const Offset(0, 2)
+                              : const Offset(0, 8),
+                          spreadRadius: _isPressed ? 0 : 2,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(_getBackgroundImage(namaLayanan)),
+                            fit: BoxFit.cover,
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.15),
+                              BlendMode.darken,
+                            ),
+                          ),
+                        ),
+                        child: Stack(
                           children: [
-                            const Spacer(),
-
-                            // Icon with Glow Effect
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.25),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white.withOpacity(0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                iconLayanan,
-                                size: 48,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Loket Number
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.0),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                widget.loket.nama,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 22,
-                                  color: Colors.white,
-                                  letterSpacing: 1,
+                            // Background pattern
+                            Positioned(
+                              right: -40,
+                              top: -40,
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.1),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ),
-                            const SizedBox(height: 12),
-
-                            // Layanan Name
-                            Text(
-                              namaLayanan,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.95),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                            Positioned(
+                              left: -20,
+                              bottom: -20,
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.08),
+                                ),
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
 
-                            const Spacer(),
+                            // Status Badge - Dinamis berdasarkan widget.loket.status
+                            Positioned(
+                              top: 12,
+                              right: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.loket.status == 'aktif'
+                                      ? Colors.white.withOpacity(0.3)
+                                      : Colors.grey.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: widget.loket.status == 'aktif'
+                                            ? Colors.white
+                                            : Colors.grey.shade400,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      widget.loket.status == 'aktif'
+                                          ? 'Aktif'
+                                          : 'Nonaktif',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
 
-                            // Action Button
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.25),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
+                            // Content
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    'Pilih Loket',
-                                    style: TextStyle(
+                                  const Spacer(),
+
+                                  // Icon with Glow Effect
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.25),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.3),
+                                          blurRadius: 20,
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      iconLayanan,
+                                      size: 48,
                                       color: Colors.white,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 18,
-                                    color: Colors.white,
+                                  const SizedBox(height: 20),
+
+                                  // Loket Number
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.0),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      widget.loket.nama,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                        color: Colors.white,
+                                        letterSpacing: 1,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Layanan Name
+                                  Text(
+                                    namaLayanan,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.95),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  const Spacer(),
+
+                                  // Action Button
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.25),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Pilih Loket',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -895,14 +1068,32 @@ class _LoketCardState extends State<_LoketCard>
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         );
       },
+    );
+  }
+
+  // Helper method untuk info row
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            '$label: $value',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

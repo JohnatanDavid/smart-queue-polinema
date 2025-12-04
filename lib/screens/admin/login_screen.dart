@@ -338,9 +338,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => LoketSelectionScreen(admin: admin),
-          ),
+          MaterialPageRoute(builder: (_) => LoketSelectionScreen(admin: admin)),
         );
       }
     } catch (e) {
