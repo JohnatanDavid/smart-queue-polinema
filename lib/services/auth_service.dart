@@ -36,46 +36,29 @@ class AuthService {
       debugPrint('✅ Step 1 Success: Firebase Auth login successful');
       debugPrint('👤 User UID: ${userCredential.user!.uid}');
       
-      // Step 2: Get admin data from Realtime Database
-      debugPrint('🔐 Step 2: Fetching admin data from Realtime Database...');
+      // ... Step 1 selesai ...
+
+      debugPrint('🔐 Step 2: Query admin by email...');
       
-      final snapshot = await _adminRef.get();
-      
+      // Query langsung ke database: Cari child yang 'email'-nya sama dengan input
+      final query = _adminRef.orderByChild('email').equalTo(email);
+      final snapshot = await query.get();
+
       if (!snapshot.exists) {
-        debugPrint('❌ Admin node does not exist in database');
+        debugPrint('❌ Admin data not found via query');
         throw Exception('Data admin tidak ditemukan di database');
       }
+
+      // Ambil data pertama yang cocok (karena email harusnya unik)
+      final dataMap = snapshot.value as Map<dynamic, dynamic>;
+      final key = dataMap.keys.first;
+      final value = Map<String, dynamic>.from(dataMap[key]);
+
+      final admin = AdminModel.fromJson(key, value);
       
-      debugPrint('✅ Step 2 Success: Admin data exists');
+      debugPrint('✅ Step 3 Success: Admin found via Query!');
+      debugPrint('👤 Admin name: ${admin.nama}');
       
-      final adminData = snapshot.value as Map<dynamic, dynamic>;
-      debugPrint('📊 Admin data keys: ${adminData.keys.toList()}');
-      
-      // Step 3: Find admin by email
-      debugPrint('🔐 Step 3: Searching for admin with email: $email');
-      
-      AdminModel? admin;
-      for (var entry in adminData.entries) {
-        debugPrint('🔍 Checking entry: ${entry.key}');
-        final data = Map<String, dynamic>.from(entry.value);
-        debugPrint('  - Email in DB: ${data['email']}');
-        debugPrint('  - Match: ${data['email'] == email}');
-        
-        if (data['email'] == email) {
-          admin = AdminModel.fromJson(entry.key, data);
-          debugPrint('✅ Step 3 Success: Admin found!');
-          debugPrint('👤 Admin name: ${admin.nama}');
-          debugPrint('🏥 Loket ID: ${admin.loketId}');
-          break;
-        }
-      }
-      
-      if (admin == null) {
-        debugPrint('❌ Admin not found in database for email: $email');
-        throw Exception('Admin dengan email $email tidak terdaftar di database');
-      }
-      
-      debugPrint('🎉 Login successful!');
       return admin;
       
     } on FirebaseAuthException catch (e) {

@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        '📧 Email: admin@polinema.ac.id\n🔑 Password: admin123\n\n✨ Fitur Multi-Poli:\n• Kelola Poli Umum & Poli Gigi bersamaan\n• 2 layar tampilan dalam 1 dashboard\n• Ganti antrian tanpa pindah halaman',
+                        '📧 Email: admin@polinema.ac.id\n🔑 Password: admin123\n\n✨ Fitur Multi-Poli:\n• Kelola Poli Umum & Poli Gigi \n• 2 layar tampilan dalam 1 dashboard\n• Ganti antrian tanpa pindah halaman',
                         style: TextStyle(fontSize: 12),
                       ),
                     ],
@@ -314,31 +314,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    // 1. Validasi Form
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    // 2. Set Loading State
     setState(() {
       _isLoading = true;
       _debugMessage = null;
     });
 
     try {
-      // BYPASS - Langsung buat admin dummy untuk multi-poli
-      final admin = AdminModel(
-        id: 'admin_1',
+      // 3. Panggil AuthService
+      // Fungsi ini akan menunggu sampai proses Auth & Ambil Data DB selesai
+      final AdminModel admin = await AuthService.login(
         email: _emailController.text.trim(),
-        nama: 'Admin Multi-Poli',
-        loketId: 'loket_1', // Default loket
-        role: 'admin',
+        password: _passwordController.text.trim(),
       );
 
-      debugPrint('✅ Login bypass successful! Admin Multi-Poli: ${admin.nama}');
+      debugPrint('✅ Login Berhasil! Admin: ${admin.nama}');
 
+      // 4. Navigasi ke Loket Selection
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
+            // Kita mengoper objek admin yang asli dari database
             builder: (_) => LoketSelectionScreen(admin: admin),
           ),
         );
@@ -346,19 +348,23 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       debugPrint('❌ Login error: $e');
 
+      // 5. Tampilkan Error
       setState(() {
-        _debugMessage = e.toString();
+        // Membersihkan pesan "Exception: " agar lebih rapi saat ditampilkan
+        _debugMessage = e.toString().replaceAll('Exception: ', '');
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login gagal: ${e.toString()}'),
+            content: Text(_debugMessage ?? 'Terjadi kesalahan'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } finally {
+      // 6. Matikan Loading
       if (mounted) {
         setState(() => _isLoading = false);
       }

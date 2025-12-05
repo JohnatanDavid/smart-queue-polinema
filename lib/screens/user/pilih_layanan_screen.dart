@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/layanan_model.dart';
 import '../../models/antrian_model.dart';
+import '../../models/loket_model.dart';
 import '../../services/firebase_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/constants.dart';
@@ -215,6 +216,50 @@ class PilihLayananScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // === MULAI KODE BARU DI SINI ===
+                
+                // 1. Judul Section Monitor
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade700,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Monitor Antrian',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 2. List Horizontal Card Monitor
+                SizedBox(
+                  height: 200, // Tinggi area scroll
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    // Menggunakan 'layananList' yang sudah didapat dari StreamBuilder utama di atas
+                    children: layananList.map((layanan) {
+                      return _QueueMonitorCard(layanan: layanan);
+                    }).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                // === SELESAI KODE BARU ===
 
                 // Section Title
                 Padding(
@@ -938,6 +983,218 @@ class _LayananCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _QueueMonitorCard extends StatelessWidget {
+  final LayananModel layanan;
+
+  const _QueueMonitorCard({super.key, required this.layanan});
+
+  @override
+  Widget build(BuildContext context) {
+    // Tentukan warna tema: Gigi (Teal), Umum/Lainnya (Blue)
+    final Color themeColor = layanan.nama.toLowerCase().contains('gigi')
+        ? Colors.teal
+        : Colors.blue;
+
+    return StreamBuilder<List<AntrianModel>>(
+      // Stream 1: Ambil data Antrian untuk hitung Sisa & Total
+      stream: FirebaseService.getAntrianByLayananStream(layanan.id),
+      builder: (context, snapshotAntrian) {
+        
+        // Logika Hitung Sisa & Total
+        final antrianList = snapshotAntrian.data ?? [];
+        //
+        final int sisaAntrian = antrianList
+            .where((a) => a.status == 'menunggu')
+            .length;
+        final int totalAntrian = antrianList.length;
+
+        return StreamBuilder<List<LoketModel>>(
+          // Stream 2: Ambil data Loket untuk info "Sedang Dilayani"
+          // Pastikan method ini ada di FirebaseService Anda
+          stream: FirebaseService.getLoketByLayananStream(layanan.id),
+          builder: (context, snapshotLoket) {
+            
+            // Logika Cari Nomor yang Sedang Dilayani
+            String displayServing = "---";
+            if (snapshotLoket.hasData && snapshotLoket.data!.isNotEmpty) {
+              // Cari loket yang punya antrianSaatIni
+              final activeLoket = snapshotLoket.data!.firstWhere(
+                (loket) => loket.antrianSaatIni != null && loket.antrianSaatIni!.isNotEmpty,
+                orElse: () => LoketModel(
+                  id: '', nama: '', layananId: '', namaLayanan: '', status: 'tutup'
+                ), //
+              );
+              
+              if (activeLoket.id.isNotEmpty) {
+                displayServing = activeLoket.antrianSaatIni!;
+              }
+            }
+
+            // Tampilan Loading jika kedua stream belum siap
+            if (snapshotAntrian.connectionState == ConnectionState.waiting && 
+                snapshotLoket.connectionState == ConnectionState.waiting) {
+               return Container(
+                  width: 320,
+                  height: 180,
+                  margin: const EdgeInsets.only(right: 16, bottom: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Center(child: CircularProgressIndicator()),
+               );
+            }
+
+            // UI Utama Card
+            return Container(
+              width: 320,
+              margin: const EdgeInsets.only(right: 16, bottom: 8),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [themeColor, themeColor.withOpacity(0.8)],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: themeColor.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Header: Nama Layanan & Total Badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          layanan.nama, //
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.confirmation_number_outlined, 
+                                color: Colors.white, size: 14),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Total: $totalAntrian',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Body: Nomor Besar & Sisa
+                  Row(
+                    children: [
+                      // Kolom Kiri: Sedang Dilayani
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sedang Dilayani',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              displayServing,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Garis Pemisah
+                      Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
+                      const SizedBox(width: 20),
+                      // Kolom Kanan: Sisa Antrian
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sisa Antrian',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '$sisaAntrian',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 4, left: 4),
+                                  child: Text(
+                                    'org',
+                                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

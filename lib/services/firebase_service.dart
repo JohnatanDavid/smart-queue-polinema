@@ -284,4 +284,25 @@ class FirebaseService {
       );
     });
   }
+
+  // Get lokets by layananId (streaming) 
+  static Stream<List<LoketModel>> getLoketByLayananStream(String layananId) {
+    // Asumsi: '_loketRef' adalah DatabaseReference ke node 'lokets'
+    return _loketRef
+        .orderByChild('layananId')
+        .equalTo(layananId)
+        .onValue
+        .map((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data == null) return [];
+
+      return data.entries.map((entry) {
+        // Pastikan konversi Map aman sesuai LoketModel Anda
+        final mapData = Map<String, dynamic>.from(entry.value);
+        // Terkadang ID ada di key, bukan di dalam value
+        if (!mapData.containsKey('id')) mapData['id'] = entry.key; 
+        return LoketModel.fromJson(mapData);
+      }).toList();
+    });
+  }
 }

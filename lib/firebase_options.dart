@@ -41,50 +41,52 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyCn8k-4pjoOxN-ktcDfb14NdaqhVmRWQIY',
+    appId: '1:69330544530:web:cdae8524201cfcf553c34b',
+    messagingSenderId: '69330544530',
     projectId: 'smart-queue-polinema',
     authDomain: 'smart-queue-polinema.firebaseapp.com',
     databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com',
-    storageBucket: 'smart-queue-polinema.appspot.com',
+    storageBucket: 'smart-queue-polinema.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyBXKLSqCVjbtjT2EFFS-LWS1LCAko0BOcg',
+    appId: '1:69330544530:android:4af257e89f5e27f953c34b',
+    messagingSenderId: '69330544530',
     projectId: 'smart-queue-polinema',
-    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com', // ← TAMBAHKAN INI
-    storageBucket: 'smart-queue-polinema.appspot.com',
+    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com',
+    storageBucket: 'smart-queue-polinema.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_IOS_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyBCA9KVWO7Y2G8aJhoF2KuiE6VU08SxZDA',
+    appId: '1:69330544530:ios:b26d5ed1611eb82453c34b',
+    messagingSenderId: '69330544530',
     projectId: 'smart-queue-polinema',
-    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com', // ← TAMBAHKAN INI
-    storageBucket: 'smart-queue-polinema.appspot.com',
-    iosBundleId: 'com.polinema.smartQueue',
+    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com',
+    storageBucket: 'smart-queue-polinema.firebasestorage.app',
+    iosBundleId: 'com.example.smartQueue',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'YOUR_MACOS_API_KEY',
-    appId: 'YOUR_MACOS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyBCA9KVWO7Y2G8aJhoF2KuiE6VU08SxZDA',
+    appId: '1:69330544530:ios:b26d5ed1611eb82453c34b',
+    messagingSenderId: '69330544530',
     projectId: 'smart-queue-polinema',
-    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com', // ← TAMBAHKAN INI
-    storageBucket: 'smart-queue-polinema.appspot.com',
-    iosBundleId: 'com.polinema.smartQueue',
+    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com',
+    storageBucket: 'smart-queue-polinema.firebasestorage.app',
+    iosBundleId: 'com.example.smartQueue',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_WINDOWS_API_KEY',
-    appId: 'YOUR_WINDOWS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyCn8k-4pjoOxN-ktcDfb14NdaqhVmRWQIY',
+    appId: '1:69330544530:web:e1b255b5d2589fc153c34b',
+    messagingSenderId: '69330544530',
     projectId: 'smart-queue-polinema',
-    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com', // ← TAMBAHKAN INI
-    storageBucket: 'smart-queue-polinema.appspot.com',
+    authDomain: 'smart-queue-polinema.firebaseapp.com',
+    databaseURL: 'https://smart-queue-polinema-default-rtdb.firebaseio.com',
+    storageBucket: 'smart-queue-polinema.firebasestorage.app',
   );
+
 }
