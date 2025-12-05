@@ -81,6 +81,7 @@ class PilihLayananScreen extends StatelessWidget {
               icon: const Icon(Icons.display_settings_outlined, size: 22),
               onPressed: () {
                 // Aksi untuk display settings
+                _showDisplayAntrian(context);
               },
             ),
           ),
@@ -1189,6 +1190,273 @@ class _QueueMonitorCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// Method untuk Tombol Display
+  void _showDisplayAntrian(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Agar bisa full screen jika ditarik
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _DisplayAntrianSheet(),
+    );
+  }
+
+
+// Widget untuk Menangani Tampilan Modal Antrian
+class _DisplayAntrianSheet extends StatelessWidget {
+  const _DisplayAntrianSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    // Kita perlu mengambil data Layanan dulu untuk membuat Tab
+    return StreamBuilder<List<LayananModel>>(
+      stream: FirebaseService.getLayananStream(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+        
+        final layananList = snapshot.data!;
+        
+        // Bungkus dengan DefaultTabController sesuai jumlah layanan
+        return DefaultTabController(
+          length: layananList.length,
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.7, // Tinggi awal 70% layar
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, controller) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                ),
+                child: Column(
+                  children: [
+                    // Handle Bar (Garis kecil di atas untuk ditarik)
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+
+                    // Header Title
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        'Monitor Antrian',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    // Tab Bar (Nama Poli)
+                    TabBar(
+                      isScrollable: layananList.length > 3, // Scroll jika layanan banyak
+                      labelColor: Colors.blue.shade700,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.blue,
+                      indicatorWeight: 3,
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      tabs: layananList.map((layanan) {
+                        return Tab(text: layanan.nama);
+                      }).toList(),
+                    ),
+
+                    const Divider(height: 1),
+
+                    // Isi Tab (List Antrian per Poli)
+                    Expanded(
+                      child: TabBarView(
+                        children: layananList.map((layanan) {
+                          return _AntrianListByLayanan(
+                            layananId: layanan.id,
+                            scrollController: controller,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Widget List Antrian Spesifik per Layanan
+class _AntrianListByLayanan extends StatelessWidget {
+  final String layananId;
+  final ScrollController scrollController;
+
+  const _AntrianListByLayanan({
+    required this.layananId,
+    required this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<AntrianModel>>(
+      stream: FirebaseService.getAntrianByLayananStream(layananId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.people_outline, size: 60, color: Colors.grey.shade300),
+                const SizedBox(height: 10),
+                Text(
+                  'Belum ada antrian',
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Filter: Hanya tampilkan yang Menunggu atau Sedang Dilayani
+        // Urutkan: Sedang Dilayani paling atas
+        final antrianList = snapshot.data!
+            .where((a) => a.status != 'selesai' && a.status != 'batal')
+            .toList();
+        
+        // Sorting: 'dipanggil' (sedang dilayani) ditaruh di atas
+        antrianList.sort((a, b) {
+           if (a.status == 'dipanggil' && b.status != 'dipanggil') return -1;
+           if (a.status != 'dipanggil' && b.status == 'dipanggil') return 1;
+           
+           // PERBAIKAN: Gunakan 'waktuAmbil'
+           return a.waktuAmbil.compareTo(b.waktuAmbil); 
+        });
+
+        return ListView.separated(
+          controller: scrollController, // Agar scrollnya nyambung dengan sheet
+          padding: const EdgeInsets.all(16),
+          itemCount: antrianList.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final antrian = antrianList[index];
+            final isServing = antrian.status == 'dipanggil'; // Sesuaikan status di DB Anda
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: isServing ? Colors.blue.shade50 : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isServing ? Colors.blue.shade200 : Colors.grey.shade200,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Nomor Antrian Besar
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isServing ? Colors.blue : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      antrian.nomorAntrian,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isServing ? Colors.white : Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  
+                  // Detail Nama & Status
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          antrian.namaPasien,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isServing ? Colors.green : Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              isServing ? 'Sedang Dilayani' : 'Menunggu',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isServing ? Colors.blue.shade700 : Colors.orange.shade800,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Indikator Loket (Optional)
+                  if (isServing)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      ),
+                      child: const Text(
+                        'LOKET',
+                        style: TextStyle(
+                           fontSize: 10, 
+                           fontWeight: FontWeight.bold, 
+                           color: Colors.green
+                        ),
+                      ),
+                    ),
                 ],
               ),
             );
