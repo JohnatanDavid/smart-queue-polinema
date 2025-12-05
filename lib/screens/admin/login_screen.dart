@@ -340,7 +340,6 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            // Kita mengoper objek admin yang asli dari database
             builder: (_) => LoketSelectionScreen(admin: admin),
           ),
         );
